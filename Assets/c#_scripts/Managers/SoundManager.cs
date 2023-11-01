@@ -1,9 +1,13 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class SoundManager : MonoBehaviour
 {
+    private const string PLAYER_PREFS_SOUND_EFFECTS_VOLUME = "SoundEffectsVolume";
+
     [SerializeField] private AudioClipRefsSO audioClipRefsSO;
     public static SoundManager Instance { get; private set; }
 
@@ -12,6 +16,8 @@ public class SoundManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+
+        volume = PlayerPrefs.GetFloat(PLAYER_PREFS_SOUND_EFFECTS_VOLUME, 1f);
     }
     private void Start()
     {        
@@ -71,6 +77,20 @@ public class SoundManager : MonoBehaviour
     public void PlayFootstepSound(Vector3 position, float volume)
     {
         PlaySound(audioClipRefsSO.footStep, position, volume);
+    }    
+
+    public void PlayCountDownSound()
+    {
+        PlaySound(audioClipRefsSO.warning, Vector3.zero);
+    }
+    public void PlayWarningSound(Vector3 position)
+    {
+        PlaySound(audioClipRefsSO.warning, position);
+    }    
+
+    public void PlaySoundEffectsSound()
+    {
+        PlaySound(audioClipRefsSO.objectPickup, Vector3.zero);
     }
 
     public void ChangeVolume()
@@ -80,10 +100,14 @@ public class SoundManager : MonoBehaviour
         {
             volume = 0f;
         }
+
+        PlayerPrefs.SetFloat(PLAYER_PREFS_SOUND_EFFECTS_VOLUME, volume);
+        PlayerPrefs.Save();
     }
 
     public float GetVolume()
     {
         return volume;
     }
+
 }

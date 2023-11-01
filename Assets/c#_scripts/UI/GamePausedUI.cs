@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -6,26 +7,42 @@ using UnityEngine.UI;
 
 public class GamePausedUI : MonoBehaviour
 {
+    public static GamePausedUI Instance { get; private set; }
+
     [SerializeField] private Button mainMenuButton;
     [SerializeField] private Button resumeButton;
+    [SerializeField] private Button optionsButton;
+    private Action OnCloseButtonAction;
+
+    private void Awake()
+    {
+        Instance = this;
+        // menu button, just loads the menu scene
+        mainMenuButton.onClick.AddListener(() =>
+        {
+            Loader.Load(Loader.Scene.MainGameMenu);
+        });
+        // resume just un pauses the game
+        resumeButton.onClick.AddListener(() => {
+            KitchenGameManager.Instance.TogglePauseGame();
+        });
+        // shows the options ui, and hides the pause menu ui.
+        optionsButton.onClick.AddListener(() =>
+        {
+            Hide();
+            OptionsUI.Instance.Show(Show);            
+            // This Shows the UI element for OptionsUI          
+        });
+    }
     private void Start()
     {
         KitchenGameManager.Instance.OnGamePaused += KitchenGameManager_OnGamePaused;
         KitchenGameManager.Instance.OnGameUnpaused += KitchenGameManager_OnGameUnpaused;
 
+
+
         Hide();
     }
-    private void Awake()
-    {
-        mainMenuButton.onClick.AddListener(() =>
-        {
-            Loader.Load(Loader.Scene.MainGameMenu);
-        });
-        resumeButton.onClick.AddListener(() => { 
-            KitchenGameManager.Instance.TogglePauseGame();
-        });
-    }
-
     private void KitchenGameManager_OnGameUnpaused(object sender, System.EventArgs e)
     {
         Hide();
@@ -36,13 +53,13 @@ public class GamePausedUI : MonoBehaviour
         Show();
     }
 
-
-    private void Show()
+    public void Show()
     {
         gameObject.SetActive(true);
     }
-    private void Hide()
+    public void Hide()
     {
         gameObject.SetActive(false);
     }
+
 }

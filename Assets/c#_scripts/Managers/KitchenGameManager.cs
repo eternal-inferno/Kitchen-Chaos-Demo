@@ -13,11 +13,11 @@ public class KitchenGameManager : MonoBehaviour
     public event EventHandler OnGameUnpaused;
 
     [SerializeField] private float gamePlayingTimerMax = 10f;
-    private float waitingToStartTimer = 1f;
     private float countDownToStartTimer = 3f;
     private float gamePlayingTimer;
     private State state;
     private bool isGamePaused = false;
+    public bool isGameObjectActive = false;
     private enum State
     {
         WaitingToStart,
@@ -28,11 +28,25 @@ public class KitchenGameManager : MonoBehaviour
     private void Start()
     {
         GameInput.Instance.OnPauseAction += GameInput_OnPauseAction;
+        GameInput.Instance.OnInteractAction += GameInput_OnInteractAction;
+    }
+
+    private void GameInput_OnInteractAction(object sender, EventArgs e)
+    {
+        if( state == State.WaitingToStart )
+        {
+            state = State.CountDownToStart;
+            OnStateChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     private void GameInput_OnPauseAction(object sender, EventArgs e)
     {
-        TogglePauseGame();
+        if(!isGameObjectActive)
+        {
+            // if the ui element is not shown
+            TogglePauseGame();
+        }
     }
 
     private void Awake()
@@ -45,12 +59,6 @@ public class KitchenGameManager : MonoBehaviour
         switch(state)
         {
             case State.WaitingToStart:
-                waitingToStartTimer -= Time.deltaTime;
-                if(waitingToStartTimer < 0f)
-                {
-                    state = State.CountDownToStart;
-                    OnStateChanged?.Invoke(this, EventArgs.Empty);
-                }
                 break;
             case State.CountDownToStart:
                 countDownToStartTimer -= Time.deltaTime;
@@ -75,14 +83,19 @@ public class KitchenGameManager : MonoBehaviour
         Debug.Log(state);*/
     }
 
-    public bool IsGamePlaying()
+    public bool IsWaitingToStart()
     {
-        return state == State.GamePlaying;
+        return state == State.WaitingToStart;
     }
 
     public bool IsCountDownToStartActive() 
     {
         return state == State.CountDownToStart;
+    }
+
+    public bool IsGamePlaying()
+    {
+        return state == State.GamePlaying;
     }
 
     public bool IsGameOverActive()

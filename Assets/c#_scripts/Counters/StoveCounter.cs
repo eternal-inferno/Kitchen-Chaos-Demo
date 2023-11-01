@@ -230,4 +230,9 @@ public class StoveCounter : BaseCounter,IHasProgress
             progressNormalized = fryingTimer / fryingTimerProgress
         });
     }
+
+    public bool IsFried()
+    {
+        return state == State.Fried;
+    }
 }

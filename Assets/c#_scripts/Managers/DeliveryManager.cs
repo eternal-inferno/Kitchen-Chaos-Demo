@@ -33,12 +33,12 @@ public class DeliveryManager : MonoBehaviour
     private void Update()
     {
         spawnRecipeTimer -= Time.deltaTime;
-        if(spawnRecipeTimer <= 0f)
+        if (spawnRecipeTimer <= 0f)
         {
             spawnRecipeTimer = spawnRecipeTimerMax;
             //So we're containing DeliveryRecipeSOList DeliveryRecipeSO's inside the waitingDeliveryRecipeSO,
             //which would have a random burger recipe inside of it, and adding it to waitingDeliveryRecipeSOList          
-            if(waitingDeliveryRecipeMax > waitingDeliveryRecipeSOList.Count)
+            if (KitchenGameManager.Instance.IsGamePlaying() && waitingDeliveryRecipeMax > waitingDeliveryRecipeSOList.Count)
             {
                 DeliveryRecipeSO waitingDeliveryRecipeSO = deliveryListSO.deliveryRecipeSOList[Random.Range( 0, deliveryListSO.deliveryRecipeSOList.Count)];                
                 
@@ -52,11 +52,12 @@ public class DeliveryManager : MonoBehaviour
 
     public void DeliverRecipe(PlateKitchenObject plateKitchenObject)
     {
-        for(int i = 0; i < waitingDeliveryRecipeSOList.Count; i++)
+        int oneTime = 1;
+        for (int i = 0; i < oneTime;)
         {
             // Goes through the recipe, Example Recipe: Cheese Burger
-            DeliveryRecipeSO waitingDeliveryRecipeSO = waitingDeliveryRecipeSOList[i];            
-            
+            DeliveryRecipeSO waitingDeliveryRecipeSO = waitingDeliveryRecipeSOList[i];
+
             if (waitingDeliveryRecipeSO.kitchenObjectSOList.Count == plateKitchenObject.GetKitchenObjectSOList().Count)
             {
                 // has the same number of ingridents
@@ -69,17 +70,16 @@ public class DeliveryManager : MonoBehaviour
 
                     bool ingridentsFound = false;
 
-                    foreach (KitchenObjectSO plateKitchenObjectSO in plateKitchenObject.GetKitchenObjectSOList())
-                    {
-                        //Cycling through all the kitchen objects inside the kitchen plate
+                    
+                    //Cycling through all the kitchen objects inside the kitchen plate
 
-                        if (recipeKitchenObjectSO == plateKitchenObjectSO)
-                        {
-                            // The ingridents match
-                            ingridentsFound = true;
-                            break;
-                        }
+                    if (recipeKitchenObjectSO == GetPlateKitchenObjectSO(plateKitchenObject))
+                    {
+                        // The ingridents match
+                        ingridentsFound = true;
+                        break;
                     }
+                    
                     if (!ingridentsFound)
                     {
                         // This recipe ingrident was not found on the plate
@@ -101,13 +101,24 @@ public class DeliveryManager : MonoBehaviour
             // No matches found!
             //the player did not Deliver the correct Recipe
             OnRecipeFail?.Invoke(this, EventArgs.Empty);
+            break;
         }
+    }
+
+    public KitchenObjectSO GetPlateKitchenObjectSO(PlateKitchenObject playerPlate)
+    {
+        foreach(KitchenObjectSO kitchenObjectSO in playerPlate.GetKitchenObjectSOList())
+        {
+            return kitchenObjectSO;
+        }
+        return null;
     }
 
     public List<DeliveryRecipeSO> GetWaitingDeliveryRecipeSOList()
     {
         return waitingDeliveryRecipeSOList;
     }
+
     public int GetSuccessfulRecipeAmount()
     {
         return successfulRecipeAmount;
